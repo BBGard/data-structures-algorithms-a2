@@ -1,335 +1,374 @@
 
 /**
- * 
+ * Randomized Binary Search Tree Node
  * @author Benjamin Gardiner
  * Based on the BSTNode class provided by Eldar Hajilarov
  */
 public class RandomizedBSTNode {
-    int key; // data at the node
-    RandomizedBSTNode left; // left child
-    RandomizedBSTNode right; // right child
-    int size; // Size of the subtree rooted at this node
+  int key; // key - the value of the node
+  RandomizedBSTNode left; // left - the left child of the node
+  RandomizedBSTNode right; // right - the right child of the node
+  int size; // size - the number of nodes in the subtree rooted at this node
 
-    public RandomizedBSTNode(int key) {
-        this.key = key;
-        left = null;
-        right = null;
-        size = 1; // Initialize the size to 1 for the current node
+  /**
+   * Constructor - initializes the node with a given key
+   * @param key - the value of the node
+   */
+  public RandomizedBSTNode(int key) {
+    this.key = key;
+    this.left = null;
+    this.right = null;
+    this.size = 1; // the size of a node is 1
+  }
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Modified methods for leftRotation, rightRotation, rootInsert, randomizedBSTInsert, randomizedBSTDelete
+
+  /**
+   * Implementation of left rotation at a node
+   * @param node - the node to rotate
+   * @return the new root of the subtree
+   */
+  public static RandomizedBSTNode leftRotation(RandomizedBSTNode node) {
+
+    if(node == null || node.right == null) {
+      return node;
     }
 
-    ////////// Modified, leftRotation, rightRotation, and rootInsert methods //////////
-    
-    // Perform a right rotation at the node and return the new root
-    static RandomizedBSTNode rightRotation(RandomizedBSTNode node) {
-    	if (node == null) {
-            return null;
-        }
-        if (node.left == null) {
-            return node;
-        }
-        
-        RandomizedBSTNode newRoot = node.left;
-        node.left = newRoot.right;
-        newRoot.right = node;
-        // Update sizes
-        newRoot.size = node.size;
-        node.size = getSize(node.left) + getSize(node.right) + 1;
-        return newRoot;
-//        RandomizedBSTNode temp = node;
-//        node = node.left;
-//        temp.left = node.right;
-//        node.right = temp;
-//        
-//        temp.size = node.size;
-//        node.size = getSize(node.left) + getSize(node.right) + 1;
-//
-//        return node;
+    // Perform left rotation
+    RandomizedBSTNode newRoot = node.right;
+    node.right = newRoot.left;
+    newRoot.left = node;
+
+    // Update size for node and newRoot
+    node.size = 1 + getSize(node.left) + getSize(node.right);
+    newRoot.size = 1 + getSize(newRoot.left) + getSize(newRoot.right);
+
+    return newRoot;
+  }
+
+  /**
+   * Implementation of right rotation at a node
+   * @param node - the node to rotate
+   * @return the new root of the subtree
+   */
+  public static RandomizedBSTNode rightRotation(RandomizedBSTNode node) {
+
+    if(node == null || node.left == null) {
+      return node;
     }
-    
- // Perform a left rotation at the node and return the new root
-    static RandomizedBSTNode leftRotation(RandomizedBSTNode node) {
-        if (node == null || node.right == null) {
-            return node;
-        }
-        
-        RandomizedBSTNode newRoot = node.right;
-        node.right = newRoot.left;
-        newRoot.left = node;
-        
-        // Update sizes
-        newRoot.size = node.size;
-        node.size = getSize(node.left) + getSize(node.right) + 1;
-        return newRoot;
-        
-//        RandomizedBSTNode temp = node;
-//        node = node.right;
-//        temp.right = node.left;
-//        node.left = temp;
-//        
-//        temp.size = node.size;
-//        node.size = getSize(node.left) + getSize(node.right) + 1;
-//
-//        return node;
+
+    // Perform right rotation
+    RandomizedBSTNode newRoot = node.left;
+    node.left = newRoot.right;
+    newRoot.right = node;
+
+    // Update size for node and newRoot
+    node.size = 1 + getSize(node.left) + getSize(node.right);
+    newRoot.size = 1 + getSize(newRoot.left) + getSize(newRoot.right);
+
+    return newRoot;
+  }
+
+  /**
+   * Implementation of root insert at a node
+   * @param node - the node to insert at
+   * @param key - the value of the node to insert
+   * @return the inserted node
+   */
+  public static RandomizedBSTNode rootInsert(RandomizedBSTNode node, int key) {
+    if(node == null) {
+      // Tree is empty, create new node
+      return new RandomizedBSTNode(key);
     }
-    
- // Root-insert at the node
-    static RandomizedBSTNode rootInsert(RandomizedBSTNode node, int key) {
-        if (node.nodeSearch(key) != null) {
-            // Key is already in the tree
-            return node;
-        }
-        return rootInsertHelper(node, key);
+
+    // Insert key and perform rotations
+    if(key < node.key) {
+      node.left = rootInsert(node.left, key);
+      node = rightRotation(node);
+    } else {
+      node.right = rootInsert(node.right, key);
+      node = leftRotation(node);
     }
-    
- // Private recursive method, called by rootInsert
-    private static RandomizedBSTNode rootInsertHelper(RandomizedBSTNode node, int key) {
-//        if (node == null) {
-//            node = new RandomizedBSTNode(key);
-//            return node;
-//        }
-//        if (key < node.key) {
-//            node.left = rootInsertHelper(node.left, key);
-//            node = rightRotation(node);
-//        } else {
-//            node.right = rootInsertHelper(node.right, key);
-//            node = leftRotation(node);
-//        }
-//
-//        // Recalculate the size attributes
-////        if (node.left != null) {
-////            node.left.size = 1 + getSize(node.left.left) + getSize(node.left.right);
-////        }
-////        if (node.right != null) {
-////            node.right.size = 1 + getSize(node.right.left) + getSize(node.right.right);
-////        }
-//        node.size = 1 + getSize(node.left) + getSize(node.right);
-//
-//        return node;
-    	 // Insert key at the root
-        RandomizedBSTNode newNode = new RandomizedBSTNode(key);
-        
-        if(node == null) {
-        	return newNode;
-        }
-        
-        if (key < node.key) {
-            newNode.right = node;
+
+    // No need to update size as it is updated in the rotations
+    return node;
+  }
+
+  /**
+   * Implementation of randomized BST insert at a node
+   * @param node - the node to insert at
+   * @param key - the value of the node to insert
+   * @return the inserted node
+   * @implNote (from ITECH-3109 Lec6.1)
+   * - uses the following recursive algorithm  for randomized insertion into BST with n nodes:
+	 * - With probability 1 / (n+1) perform a root insertion and stop;
+	 * - With the probability n / (n+1) , apply the same algorithm recursively to the appropriate (left or right) subtree;
+   * - To get n at each step, we need to store the size of each subtree and update it during the insertion operations.
+   */
+  public static RandomizedBSTNode randomizedBSTInsert(RandomizedBSTNode node, int key) {
+    if(node == null) {
+      // Tree is empty, create new node
+      // System.out.println("Empty tree!");
+      return new RandomizedBSTNode(key);
+    }
+
+    // Generate a random probability to decide to insert at root or recursively
+    double probability = Math.random(); // Generates a random double between 0.0 and 1.0
+    // Probability of inserting at root is 1 / (N + 1)
+    double rootProbability = 1.0 / (RandomizedBSTNode.getSize(node) + 1); 
+
+    // Insert key and perform rotations
+    if(probability < rootProbability) {
+      node = rootInsert(node, key);
+    } else {
+      if(key < node.key) {
+        node.left = randomizedBSTInsert(node.left, key);
+      } else {
+        node.right = randomizedBSTInsert(node.right, key);
+      }
+    }
+
+    // Update the size of the node
+    node.size = 1 + RandomizedBSTNode.getSize(node.left) + RandomizedBSTNode.getSize(node.right);
+
+    // Check and fix balance using rotations if needed
+    int balance = getBalance(node);
+
+    if (balance > 1) {
+        // Left-heavy, perform right rotation or left-right rotation
+        if (getBalance(node.left) >= 0) {
+            return rightRotation(node);
         } else {
-            newNode.left = node;
+            node.left = leftRotation(node.left);
+            return rightRotation(node);
         }
-        newNode.size = getSize(newNode.left) + getSize(newNode.right) + 1;
-        return newNode;
-    }
-    
-    // Gets the size of a node
-    public static int getSize(RandomizedBSTNode node) {
-    	if(node == null) {
-    		return 0;
-    	} 
-    	else {
-    		return node.size;
-    	}
-    }
-    
-    static RandomizedBSTNode randomizedBSTInsert(RandomizedBSTNode node, int key) {
-        if (node.nodeSearch(key) != null) {
-            // Key is already in the tree
-            return node;
-        }
-        return randomizedBSTInsertHelper(node, key);
-    }
-    
-    private static RandomizedBSTNode randomizedBSTInsertHelper(RandomizedBSTNode node, int key) {
-        if (node == null) {
-            return new RandomizedBSTNode(key);
-        }
-
-        // Generate a random probability to decide to insert at root or recursively
-        double randomProbability = Math.random(); // Generate random probability
-        double probabilityRoot = 1.0 / (getSize(node) + 1); // Probability 1/(N+1)
-
-    
-        // If probability is less than or equal to the threshold, perform root insert
-        if(randomProbability <= probabilityRoot) {
-            // Perform a root insertion and stop
-            return RandomizedBSTNode.rootInsert(node, key);
+    } else if (balance < -1) {
+        // Right-heavy, perform left rotation or right-left rotation
+        if (getBalance(node.right) <= 0) {
+            return leftRotation(node);
         } else {
-            // Recursively insert into the appropriate subtree
-            if (key < node.key) {
-                node.left = randomizedBSTInsertHelper(node.left, key);
-            } else {
-                node.right = randomizedBSTInsertHelper(node.right, key);
-            }
-
-            // Update the size attribute
-//            node.size++;
-            node.size = getSize(node.left) + getSize(node.right) + 1;
-
-            return node;
+            node.right = rightRotation(node.right);
+            return leftRotation(node);
         }
     }
-    
-     
-	public RandomizedBSTNode randomizedBSTDelete(RandomizedBSTNode node, int key) {
-		if (node == null) {
-			return null; // Key not found
+
+    return node;
+  }
+
+  /**
+ * Implementation of randomized BST delete at a node
+ * @param node - the node to delete at
+ * @param key - the value of the node to delete
+ * @return the deleted node
+ * @implNote (from ITECH-3109 Lec6.1)
+ * - First, we define a join of two disjoint BSTs, T1 (of size n1) and T2 (of size n2),
+ * - such that all keys in T1 are less than all keys in T2.
+ * - Use T1 as root with probability n1 / (n1 + n2), and recursively join right subtree of T1 with T2;
+ * - Use T2 as root with probability n2 / (n1 + n2), and recursively join left subtree of T2 with T1;
+ * - Randomized delete:
+ * - Given a key k, find a node with k and delete it;
+ * - Join two broken subtrees as above;
+ */
+  public static RandomizedBSTNode randomizedBSTDelete(RandomizedBSTNode node, int key) {
+    if(node == null) {
+      return null;
+    }
+
+    // Delete key and perform rotations
+    if(key == node.key) {
+      // Join the left and right subtrees
+      node = join(node.left, node.right);
+    } else if(key < node.key) {
+      // Delete key from left subtree and perform rotations
+      node.left = randomizedBSTDelete(node.left, key);
+      node = rightRotation(node);
+    } else {
+      // Delete key from right subtree and perform rotations
+      node.right = randomizedBSTDelete(node.right, key);
+      node = leftRotation(node);
+    }
+
+    // No need to update size as it is updated in the rotations
+
+    // Check and fix balance using AVL rotations if needed
+    int balance = getBalance(node);
+
+    if (balance > 1) {
+        // Left-heavy, perform right rotation or left-right rotation
+        if (getBalance(node.left) >= 0) {
+            return rightRotation(node);
+        } else {
+            node.left = leftRotation(node.left);
+            return rightRotation(node);
+        }
+    } else if (balance < -1) {
+        // Right-heavy, perform left rotation or right-left rotation
+        if (getBalance(node.right) <= 0) {
+            return leftRotation(node);
+        } else {
+            node.right = rightRotation(node.right);
+            return leftRotation(node);
+        }
+    }
+
+    return node;
+  }
+
+  /**
+   * Implementation of join of two disjoint BSTs
+   * @param tree1 - the first tree
+   * @param tree2 - the second tree
+   * @return the joined tree
+   */
+	public static RandomizedBSTNode join(RandomizedBSTNode tree1, RandomizedBSTNode tree2) {
+		if (tree1 == null) {
+			return tree2;
+		}
+		if (tree2 == null) {
+			return tree1;
 		}
 
-		if (key == node.key) {
-			// Node with the key is found; perform deletion and join two subtrees
-			return join(node.left, node.right);
-		} else if (key < node.key) {
-			node.left = randomizedBSTDelete(node.left, key);
+		// Join the two subtrees using a random probability
+		double probability = Math.random();
+		// Probability of joining tree1 as root is size of tree1 / (size of tree1 + size
+		// of tree2)
+		double tree1Probability = RandomizedBSTNode.getSize(tree1)
+				/ (RandomizedBSTNode.getSize(tree1) + RandomizedBSTNode.getSize(tree2));
+
+		if (probability < tree1Probability) {
+			// Join tree1 as root and recursively join right subtree of tree1 with tree2
+			tree1.right = join(tree1.right, tree2);
+			tree1 = leftRotation(tree1);
 		} else {
-			node.right = randomizedBSTDelete(node.right, key);
+			// Join tree2 as root and recursively join left subtree of tree2 with tree1
+			tree2.left = join(tree1, tree2.left);
+			tree2 = rightRotation(tree2);
 		}
 
-		// Update the size attribute
-		node.size--;
+		// No need to update size as it is updated in the rotations
 
-		return node;
+		return tree1;
 	}
-	
-	private RandomizedBSTNode join(RandomizedBSTNode t1, RandomizedBSTNode t2) {
-	    if (t1 == null) {
-	        return t2;
-	    }
-	    if (t2 == null) {
-	        return t1;
-	    }
 
-	    // Generate a random probability
-	    double p = Math.random();
-	    double threshold = (double) t1.size / (double) (t1.size + t2.size);
 
-	    if (p <= threshold) {
-	        // Use t1 as the root
-	        t1.right = join(t1.right, t2);
-	        // Update the size attribute
-	        t1.size = t1.size + t2.size + 1;
-	        return t1;
-	    } else {
-	        // Use t2 as the root
-	        t2.left = join(t1, t2.left);
-	        // Update the size attribute
-	        t2.size = t1.size + t2.size + 1;
-	        return t2;
-	    }
-	}
-	
-	// Helper method to check if a subtree is balanced
-//    public static boolean isBalanced(RandomizedBSTNode node) {
-//        if (node == null) {
-//            return true; // An empty subtree is balanced
-//        }
-//
-//        int leftHeight = getHeight(node.left);
-//        int rightHeight = getHeight(node.right);
-//        
-////        System.out.println("leftHeight: " + leftHeight);
-////        System.out.println("rightHeight: " + rightHeight);
-//
-//        // Check if the heights of left and right subtrees differ by at most 1
-//        if (Math.abs(leftHeight - rightHeight) <= 1) {
-//            // Recursively check left and right subtrees
-//            return isBalanced(node.left) && isBalanced(node.right);
-//        }
-//
-//        return false; // The tree is not balanced
-//    }
+  /*******************************************************************************************************
+   * Helper methods - From provided BSTNode, unless otherwise stated
+   */
 
-    
-    //////////////////////// Methods from BSTNode ///////////////////////////////////
-  //Implementation of standard BST search at a node 
-    //returns node that contains the key
-    RandomizedBSTNode nodeSearch(int key) {
-    	RandomizedBSTNode node = this;
-
-        while (node != null) {
-            if (key == node.key) {
-                return node;
-            } else if (key < node.key) {
-                node = node.left;
-            } else {
-                node = node.right;
-            }
-        }
-        return null;
+  // Returns the size of a node
+  public static int getSize(RandomizedBSTNode node) {
+    if(node == null) {
+      return 0;
     }
-    
-  //Root-search at the node
-    static RandomizedBSTNode rootSearch(RandomizedBSTNode node, int key) {
-        if (node == null) {
-            return null;
-        }
-        if (key == node.key) {
-            return node;
-        }
-        if (key < node.key) {
-        	RandomizedBSTNode temp = rootSearch(node.left, key);
-            if (temp != null) {
-                node.left = temp;
-                node = rightRotation(node);
-                return node;
-            }
-            return null;
-        }
-        if (key > node.key) {
-        	RandomizedBSTNode temp = rootSearch(node.right, key);
-            if (temp != null) {
-                node.right = temp;
-                node = leftRotation(node);
-                return node;
-            }
-            return null;
-        }
-        return null;
+    return node.size;
+  }
+
+  // Returns the balance of a node
+  public static int getBalance(RandomizedBSTNode node) {
+    if(node == null) {
+      return 0;
     }
-    
-    @Override
-    public String toString() {
-        String s = "data: " + key;
-        return s;
+    return getHeight(node.left) - getHeight(node.right);
+  }
+
+  // Returns the height of a node
+  public static int getHeight(RandomizedBSTNode node) {
+    if(node == null) {
+      return 0;
     }
-    
-    static int getHeight(RandomizedBSTNode n) {
-        if (n == null) {
-            return 0;
-        }
-        int h1 = getHeight(n.left);
-        int h2 = getHeight(n.right);
-        
-        return h1 > h2 ? h1 + 1 : h2 + 1;
+    return 1 + Math.max(getHeight(node.left), getHeight(node.right));
+  }
+
+  // Returns the node with the given key
+  public static RandomizedBSTNode nodeSearch(RandomizedBSTNode node, int key) {
+    if(node == null || node.key == key) {
+      return node;
     }
 
-    void printPreorderNode() {
-        System.out.print(key + " ");
-        if (left != null) {
-            left.printPreorderNode();
-        }
-        if (right != null) {
-            right.printPreorderNode();
-        }
+    if(key < node.key) {
+      return nodeSearch(node.left, key);
+    } else {
+      return nodeSearch(node.right, key);
+    }
+  }
+
+  // Root search for a node with the given key
+  public static boolean rootSearch(RandomizedBSTNode node, int key) {
+    if(node == null) {
+      return false;
     }
 
-    void printInorderNode() {
-        if (left != null) {
-            left.printInorderNode();
-        }
-        System.out.print(key + " ");
-        if (right != null) {
-            right.printInorderNode();
-        }
+    if(key == node.key) {
+      return true;
     }
 
-    void printPostorderNode() {
-        if (left != null) {
-            left.printPostorderNode();
-        }
-        if (right != null) {
-            right.printPostorderNode();
-        }
-        System.out.print(key + " ");
+    if(key < node.key) {
+      node = rightRotation(node);
+      return rootSearch(node.left, key);
+    } else {
+      node = leftRotation(node);
+      return rootSearch(node.right, key);
     }
+  }
+
+  // Implementation of standard BST insert at a node
+  // returns true if key inserted
+  // returns false if key already exists
+  public boolean nodeInsert(int key) {
+    if (key == this.key) {
+      System.err.println("The tree already contains a node with the key: " + key);
+      return false;
+    }
+    if (key < this.key) {
+      if (left == null) {
+        left = new RandomizedBSTNode(key);
+        return true;
+      } else {
+        return left.nodeInsert(key);
+      }
+    } else {
+      if (right == null) {
+        right = new RandomizedBSTNode(key);
+        return true;
+      } else {
+        return right.nodeInsert(key);
+      }
+    }
+  }
+
+  // Prints the tree using preorder traversal
+  public void printPreorderNode() {
+    System.out.print(key + " ");
+    if (left != null) {
+      left.printPreorderNode();
+    }
+    if (right != null) {
+      right.printPreorderNode();
+    }
+  }
+
+  // Prints the tree using inorder traversal
+  public void printInorderNode() {
+    if (left != null) {
+      left.printInorderNode();
+    }
+    System.out.print(key + " ");
+    if (right != null) {
+      right.printInorderNode();
+    }
+  }
+
+  // Prints the tree using postorder traversal
+  public void printPostorderNode() {
+    if (left != null) {
+      left.printPostorderNode();
+    }
+    if (right != null) {
+      right.printPostorderNode();
+    }
+    System.out.print(key + " ");
+  }
+
+
 }
-
